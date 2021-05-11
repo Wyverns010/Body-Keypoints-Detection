@@ -3,6 +3,7 @@
 import cv2 as cv
 import numpy as np
 import argparse
+import csv
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input', help='Path to image or video. Skip to capture frames from camera')
@@ -41,11 +42,16 @@ while cv.waitKey(1) < 0:
     
     net.setInput(cv.dnn.blobFromImage(frame, 1.0, (inWidth, inHeight), (127.5, 127.5, 127.5), swapRB=True, crop=False))
     out = net.forward()
+    print('-----',out.shape,'-----')
+    print('-----',out[0,0,:,:],'-----')
     out = out[:, :19, :, :]  # MobileNet output [1, 57, -1, -1], we only need the first 19 elements
 
     assert(len(BODY_PARTS) == out.shape[1])
 
     points = []
+    keypointData = []
+    val = list(BODY_PARTS.keys())
+    print('-----',val,'-----')
     for i in range(len(BODY_PARTS)):
         # Slice heatmap of corresponging body's part.
         heatMap = out[0, i, :, :]
@@ -58,7 +64,12 @@ while cv.waitKey(1) < 0:
         y = (frameHeight * point[1]) / out.shape[2]
         # Add a point if it's confidence is higher than threshold.
         points.append((int(x), int(y)) if conf > args.thr else None)
+        keypointData.append([list(BODY_PARTS.keys())[i], points[-1]])
 
+    with open('keypoints.csv','w') as csvFile:
+        writer = csv.writer(csvFile)
+        writer.writerows(keypointData)
+    
     for pair in POSE_PAIRS:
         partFrom = pair[0]
         partTo = pair[1]
@@ -76,5 +87,6 @@ while cv.waitKey(1) < 0:
     t, _ = net.getPerfProfile()
     freq = cv.getTickFrequency() / 1000
     cv.putText(frame, '%.2fms' % (t / freq), (10, 20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
-
+    print('Keypoints detected(19 max, None if confidence threshold is low) :-')
+    print(points)
     cv.imshow('OpenPose using OpenCV', frame)
