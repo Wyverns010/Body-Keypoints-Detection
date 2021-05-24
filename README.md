@@ -9,6 +9,18 @@ Perform Human Pose Estimation in OpenCV Using OpenPose MobileNet
 ![OpenCV Using OpenPose MobileNet](output.JPG)
 
 
+# How to use current impl
+
+- Test with image
+```
+python keypoints_detector.py
+```
+
+**Things to Note**:
+
+* All images that being processed by the code are in `images` folder
+* The keypoints for all the iamgesw processed are stored in `keypoints.csv` file
+
 # How to use
 
 - Test with webcam
