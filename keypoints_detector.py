@@ -57,7 +57,7 @@ for image in imagesList:
     assert(len(BODY_PARTS) == out.shape[1])
 
     points = []
-    keypointData = []
+    keypointData = [image.split('\\')[-1].split('.')[0]]
     val = list(BODY_PARTS.keys())
     # print('-----',val,'-----')
     for i in range(len(BODY_PARTS)):
